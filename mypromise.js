@@ -28,25 +28,32 @@ module.exports=class mypromise {
     }
     then(onFulfilled,onRejected){
         const that=this;
-        onFulfilled=typeof onFulfilled==='function'?onFulfilled:(value)=>value;
-        onRejected=typeof onRejected==='function'?onRejected:(reason)=>{throw reason}
-        if(that.state==='fulfilled'){
-            setTimeout(()=>{
-                onFulfilled(that.value)
-            })
-        }
-        if(that.state==='rejected'){
-            setTimeout(()=>{
-                onRejected(that.reason)
-            })
-        }
-        if(that.state==='pending'){
-            that.onFulfilledCallback.push(()=>{
-                onFulfilled(that.value)
-            })
-            that.onRejectedCallback.push(()=>{
-                onRejected(that.reason)
-            })
-        }
+        onFulfilled=typeof onFulfilled==='function'?onFulfilled:value=>value;
+        onRejected=typeof onRejected==='function'?onRejected:reason=>{throw reason}
+        let promise2 = new mypromise((resolve,reject)=>{
+            if(that.state==='fulfilled'){
+                setTimeout(()=>{
+                    const x=onFulfilled(that.value);
+                    resolve(x);
+                })
+            }
+            if(that.state==='rejected'){
+                setTimeout(()=>{
+                    const x =onRejected(that.reason);
+                    reject(x)
+                })
+            }
+            if(that.state==='pending'){
+                that.onFulfilledCallback.push(()=>{
+                    const x=onFulfilled(that.value);
+                    resolve(x)
+                })
+                that.onRejectedCallback.push(()=>{
+                    const x=onRejected(that.reason);
+                    reject(x)
+                })
+            }
+        })
+        return promise2
     }
 }
